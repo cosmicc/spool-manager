@@ -3,7 +3,7 @@
 ### Utilizes the HX711 Load sensor to calculate filament use and stores the data.
 
 This is very new alpha WIP side project.
-AFAIK there isn't any good sppol management options for klipper, so im making this for myself.
+AFAIK there isn't any good spool management options for klipper, so im making this for myself.
 I'm trying to not make it too custom so others can potentially use it/expand on it.
 
 This script requires all spools be labeled with a unique "spool id".  I use a single letter and number for the id, and affix a label each spool with this id.
