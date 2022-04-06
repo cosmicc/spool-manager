@@ -1,0 +1,26 @@
+[gcode_macro LOAD_FILAMENT]
+description: Load Filament
+gcode:
+  {% set SPOOL_ID = params.SPOOL_ID %}
+  {% set ETEMP = params.TEMP|default(240)|float %}
+  {% if printer.idle_timeout.state == "Printing" and not printer.pause_resume.is_paused %}
+    {action_respond_info("This command cannot be used while printing")}
+  {% endif %}
+  {% if params.SPOOL_ID %}
+    SAVE_VARIABLE VARIABLE=loaded_spool VALUE='"{SPOOL_ID}"'
+    RESPOND TYPE=command MSG="{ 'Load Spool %s Now' % (SPOOL_ID) }"
+    M117 Heating Hotend
+    M109 S{ETEMP}
+    RUN_SHELL_COMMAND CMD=spool_change
+    M117 Loading Filament {SPOOL_ID}
+    RESPOND TYPE=echo MSG="4"
+    G90
+    G92 E0 
+    G1 E500 F2000 
+    G92 E0 
+    G1 E200 F360
+    G92 E0 ;Reset the position of the extruder
+    M117 Filament {SPOOL_ID} Loaded
+  {% else %}
+     {action_respond_info("You must specify a spool ID for the loading filament")}
+  {% endif %}
