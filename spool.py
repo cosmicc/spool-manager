@@ -17,90 +17,6 @@ import RPi.GPIO as GPIO
 from hx711 import HX711
 from wrapt_timeout_decorator import timeout
 
-vars_file = '/home/pi/klipper_config/saved_vars.cfg'
-spool_data = '/home/pi/klipper_config/spools.csv'
-sensor_out_pin = 17 # GPIO pin for the weight sensor output
-sensor_clk_pin = 22 # GPIO pin for the weight sensor clock
-loglevel = logging.INFO
-
-@timeout(3)
-def calculate_live_weight():
-    #log.debug('Reading values from load sensor')
-    #try:
-    #    measures = hx711.get_raw_data(num_measures=10)
-    #except:
-    #    log.error('Error reading load values')
-    #    GPIO.cleanup()
-    #    exit(3)
-    #return measures
-    return 998
-
-@timeout(3)
-def initialize_sensor():
-    log.debug('Initalizing load sensor')
-    try:
-        hx711 = HX711(
-            dout_pin=sensor_out_pin,
-            pd_sck_pin=sensor_clk_pin,
-            channel='A',
-            gain=64
-        )
-
-        hx711.reset()   # Before we start, reset the HX711 (not obligate)
-    except:
-        log.error('Error initializing the load sensor')
-        GPIO.cleanup()
-        exit(3)
-
-console_handler = logging.StreamHandler(sys.stdout)
-logging.basicConfig(
-        handlers=[console_handler,],
-        format='%(message)s',
-        level=loglevel)
-log = logging.getLogger()
-
-#initialize_sensor()
-try:
-    mode = sys.argv[1]
-except IndexError:
-    log.error('Must specify a action')
-    exit(1)
-try:
-    param2 = sys.argv[2]
-except IndexError:
-    param2 = None
-try:
-    param3 = sys.argv[3]
-except IndexError:
-    param3 = None
-
-if mode != 'query' and mode != 'load' and mode != 'endprint' and mode != 'startprint':
-    log.error(f'Action "{mode}" is invalid')
-    exit(1)
-
-if param2:
-    if param2.upper() == 'V' or param3.upper() == "V":
-        verbose = True
-    else:
-        verbose = False
-else:
-    verbose =False
-
-variables = configparser.ConfigParser()
-variables.read(vars_file)
-if 'Variables' not in variables:
-    logger.error('No section [Variables] in saved_vars.cfg')
-    exit(1)
-elif 'loaded_spool' not in variables['Variables']:
-    logger.error('No variable loaded_spool in section [Variables]')
-    exit(1)
-
-loaded_spoolcode = variables['Variables']['loaded_spool'].replace("'", "")
-extra_weight = variables['Variables']['extra_weight']
-distance_to_extruder = variables['Variables']['distance_to_extruder']
-calibration_offset = variables['Variables']['calibration_offset']
-
-log.debug(f'Current Spool ID retrieved from saved_vars.cfg: {loaded_spoolcode}')
 
 class Spool:
     def __init__(self, spool_id):
@@ -168,13 +84,99 @@ class Spool:
 
         log.info(f'Total Length Used: {self.length_used_m:.3f} m')
 
-spool = Spool(loaded_spoolcode)
+@timeout(3)
+def calculate_live_weight():
+    #log.debug('Reading values from load sensor')
+    #try:
+    #    measures = hx711.get_raw_data(num_measures=10)
+    #except:
+    #    log.error('Error reading load values')
+    #    GPIO.cleanup()
+    #    exit(3)
+    #return measures
+    return 998
 
-if mode == 'query':
-    spool.print_values()
-    exit(0)
-elif mode == 'load' or mode == 'endprint':
-    pass
-    # Update Weight
-    # Update Length
+@timeout(3)
+def initialize_sensor():
+    log.debug('Initalizing load sensor')
+    try:
+        hx711 = HX711(
+            dout_pin=sensor_out_pin,
+            pd_sck_pin=sensor_clk_pin,
+            channel='A',
+            gain=64
+        )
+
+        hx711.reset()   # Before we start, reset the HX711 (not obligate)
+    except:
+        log.error('Error initializing the load sensor')
+        GPIO.cleanup()
+        exit(3)
+
+
+if __name__ == '__main__':
+    vars_file = '/home/pi/klipper_config/saved_vars.cfg'
+    spool_data = '/home/pi/klipper_config/spools.csv'
+    sensor_out_pin = 17 # GPIO pin for the weight sensor output
+    sensor_clk_pin = 22 # GPIO pin for the weight sensor clock
+    loglevel = logging.INFO
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    logging.basicConfig(
+            handlers=[console_handler,],
+         format='%(message)s',
+         level=loglevel)
+    log = logging.getLogger()
+
+    #initialize_sensor()
+    try:
+        mode = sys.argv[1]
+    except IndexError:
+        log.error('Must specify a action')
+        exit(1)
+    try:
+        param2 = sys.argv[2]
+    except IndexError:
+        param2 = None
+    try:
+        param3 = sys.argv[3]
+    except IndexError:
+       param3 = None
+
+    if mode != 'query' and mode != 'load' and mode != 'endprint' and mode != 'startprint':
+        log.error(f'Action "{mode}" is invalid')
+        exit(1)
+
+    if param2:
+        if param2.upper() == 'V' or param3.upper() == "V":
+            verbose = True
+        else:
+            verbose = False
+    else:
+        verbose =False
+
+    variables = configparser.ConfigParser()
+    variables.read(vars_file)
+    if 'Variables' not in variables:
+        logger.error('No section [Variables] in saved_vars.cfg')
+        exit(1)
+    elif 'loaded_spool' not in variables['Variables']:
+        logger.error('No variable loaded_spool in section [Variables]')
+        exit(1)
+
+    loaded_spoolcode = variables['Variables']['loaded_spool'].replace("'", "")
+    extra_weight = variables['Variables']['extra_weight']
+    distance_to_extruder = variables['Variables']['distance_to_extruder']
+    calibration_offset = variables['Variables']['calibration_offset']
+
+    log.debug(f'Current Spool ID retrieved from saved_vars.cfg: {loaded_spoolcode}')
+    spool = Spool(loaded_spoolcode)
+
+    if mode == 'query':
+        spool.print_values()
+        exit(0)
+    elif mode == 'load' or mode == 'endprint':
+        pass
+        # Update Weight
+        # Update Length
 
