@@ -9,13 +9,11 @@ I'm trying to not make it too custom so others can potentially use it/expand on 
 This script requires all spools be labeled with a unique "spool id".  I use a single letter and number for the id, and affix a label each spool with this id.
 I use P1 for PLA filament #1, G4 for PETG filament #4, etc.  But you can use whatever spool ID's you choose, as long as they are unique for each spool of filament.
 
-
-
-Install:
-  from your home directory:
-    `git clone https://github.com/cosmicc/spool-manager.git
-    cd spool-manager
-    ./install.sh`
+###Install:
+    `cd ~`
+    `git clone https://github.com/cosmicc/spool-manager.git`
+    `cd spool-manager`
+    `./install.sh`
 
 Python Requirements:
   Python 3.7+
@@ -27,11 +25,10 @@ Python Requirements:
 
   **Add to klipper's printer.cfg:**
   
-  `
-  [save_variables]
-  filename: ~/klipper_config/saved_vars.cfg
+  `[save_variables]`
+  `filename: ~/klipper_config/saved_vars.cfg`
   
-  [gcode_shell_command spool]
+  `[gcode_shell_command spool]
   command: ~/spool-manager/spool.py
   timeout: 10
   verbose: True
@@ -39,8 +36,7 @@ Python Requirements:
   [gcode_shell_command calibrate_weight]
   command: ~/spool-manager/calibrate.py
   timeout: 30
-  verbose: True
-  `
+  verbose: True`
 
   **Add to klipper's printer.cfg (or wherever you put your klipper gcode macros)**
   
