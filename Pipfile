@@ -4,6 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+hx711 = "*"
+wrapt-timeout-decorator = "*"
 
 [dev-packages]
 

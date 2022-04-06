@@ -1,5 +1,6 @@
 # spool-manager
 Weighted Spool Manager for Klipper
+Utilizes the HX711 Load sensor to calculate and save filament data
 
 Python Requirements:
   Pandas
