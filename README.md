@@ -10,10 +10,10 @@ This script requires all spools be labeled with a unique "spool id".  I use a si
 I use P1 for PLA filament #1, G4 for PETG filament #4, etc.  But you can use whatever spool ID's you choose, as long as they are unique for each spool of filament.
 
 ### Install:
-    `cd ~`
-    `git clone https://github.com/cosmicc/spool-manager.git`
-    `cd spool-manager`
-    `./install.sh`
+     cd ~
+     git clone https://github.com/cosmicc/spool-manager.git
+     cd spool-manager
+     ./install.sh
 
 Python Requirements:\n
   Python 3.7+\n
