@@ -1,5 +1,5 @@
 # spool-manager
-Ultimate Weighted Spool Manager for Klipper
+Weighted Spool Manager for Klipper
 
 Python Requirements:
   Pandas
