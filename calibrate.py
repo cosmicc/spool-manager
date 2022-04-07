@@ -51,7 +51,7 @@ def initialize_sensor():
         )
         hx711.reset()   # Before we start, reset the HX711 (not obligate)
     except:
-        log.error('Error initializing the load sensor')
+        log.critical('Error initializing the load sensor')
         GPIO.cleanup()
         exit(3)
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     variables = configparser.ConfigParser()
     variables.read(vars_file)
     if 'Variables' not in variables:
-        logger.error('No section [Variables] in saved_vars.cfg')
+        log.error('No section [Variables] in saved_vars.cfg')
         exit(1)
 
     # Run gcode to shut off heaters, motors, lights for least noise
