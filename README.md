@@ -1,13 +1,20 @@
 # spool-manager
-## Weighted Spool Manager for Klipper
-### Utilizes the HX711 Load sensor to calculate filament use and stores the data, this is required.
+## Weighted Filament Spool Manager for Klipper
+### Utilizes the HX711 Load sensor to calculate filament use and stores the data, this sensor is required.
 
-This is very new alpha WIP side project.
-AFAIK there isn't any good spool management options for klipper, so im making this for myself.
-I'm trying to not make it too custom so others can potentially use it/expand on it.
+This is very new alpha work-in-progress side project.<br />
+I havent found any spool management options for klipper, so im making this for myself.<br />
+I came from OctoPrint with the Spool-Manager plugin. It's the only thing I miss after migrating to Klipper, but klipper is way too good for me to go back.
+I'm trying to not make this too custom so others can potentially use it or expand on it.<br />
+Currently, it just uses GCode commands to operate, and uses the printer console to display output. This may change if I figure out better ways to "plug-in" to Klipper. I'm new to klipper, so i'm still trying to figure all this out.
 
-This script requires all spools be labeled with a unique "spool id".  I use a single letter and number for the id, and affix a label each spool with this id.
-I use P1 for PLA filament #1, G4 for PETG filament #4, etc.  But you can use whatever spool ID's you choose, as long as they are unique for each spool of filament.
+This script requires all spools be labeled with a unique "spool id".  I use a single letter and number for the id, and attach a label to each spool with this id.
+I use P1 for PLA filament #1, G4 for PETG filament #4, etc.  But you can use whatever spool ID's you choose, as long as they are unique for each spool of filament.<br />
+
+This script will display & store information about all of your filament spools, including color, type, manufaturer, first use, last use, date purchased, filament diameter, filament density, filament weights, filament length total, filament length remaining, filament spool price, filament price per gram, and some others.<br />
+It will calculate filament length remaining based on weight after each print and filament change & display and save this infomation.<br />
+
+A calibration script is included to calibrate and recalibrate the weight sensors<br />
 
 ### General Requirements:
      Raspberry Pi running klipper
@@ -74,7 +81,7 @@ Add to your filament unload macro:<br />
 Add to your print start macro:<br />
      `RUN_SHELL_COMMAND CMD=spool PARAMS=printstart` 
      
-Add to your print end macro:<br />
+Add to your print end & print cancel macro:<br />
      `RUN_SHELL_COMMAND CMD=spool PARAMS=printend`
  
  GCode commands:<br />
@@ -84,6 +91,8 @@ Add to your print end macro:<br />
 ### Todo & Potential Features:
   - [ ] Move weight sensor pins to saved_vars.cfg
   - [ ] Add a way to add new spools/edit spool data manually (and/or with Gcodes possibly)
+  - [ ] Query other spools infomation that arnt currently loaded
+  - [ ] Display filament results after end of each print
   - [ ] Add gcode execute before calibration to shut off any lights, fans, motors, heat
   - [ ] Add gcode option to modify weight sensor pins
   - [ ] Add gcode option to modify calibration_weight option
