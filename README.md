@@ -1,6 +1,7 @@
 # spool-manager
 ## Weighted Filament Spool Manager for Klipper
-### Utilizes the HX711 Load sensor to calculate filament use and stores the data, this sensor is required.
+### Utilizes a Load Sensor and a HX711 load cell amplifier to calculate filament use and stores the data, these are required.
+### Optional HTU21D/SHT21/SI7021/HDC1080 Temperature & Humidity Sensor to monitor filament environment.
 
 This is very new alpha work-in-progress side project.<br />
 I havent found any spool management options for klipper, so im making this for myself.<br />
@@ -17,6 +18,9 @@ It will calculate filament length remaining based on weight after each print and
 A calibration script is included to calibrate and recalibrate the weight sensors<br />
 
 ### General Requirements:
+     Analog Load Cell (5kg Preferred for best accuracy) https://tinyurl.com/2p9857vx
+     HX711 Load cell amplifier (Comes with most load cells)
+     (Optional) HTU21D/SHT21/SI7021/HDC1080 Temp Sensor 
      Raspberry Pi running klipper
      Python 3.7+
 
