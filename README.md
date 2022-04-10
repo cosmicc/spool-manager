@@ -22,7 +22,7 @@ A calibration script is included to calibrate and recalibrate the weight sensors
      HX711 Load cell amplifier (Comes with most load cells)
      (Optional) HTU21D/SHT21/SI7021/HDC1080 Temp Sensor 
      Raspberry Pi running klipper
-     Python 3.7+
+     Python 3.8+
 
 ### Install:
      cd ~
@@ -32,7 +32,7 @@ A calibration script is included to calibrate and recalibrate the weight sensors
 
 *Python Requirements:*<br />
 ```
-    pandas (installed from install.sh)
+    moonraker-api (installed from install.sh)
     hx711 (installed from install.sh)
 ```
   
