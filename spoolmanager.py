@@ -1,40 +1,73 @@
 #!/usr/bin/env python3
 
 #
-# Weighted Spool Manager for Klipper
+# Spool Manager for Klipper
 #
-# Utilizes the HX711 Load sensor to calculate and save filament data
+# Utilizes a load sensor and HX711 load sensor amplifier to calculate and save filament data
 #
 # Written by Ian Perry ianperry99@gmail.com
 # https://github.com/cosmicc/spool-manager
 #
 
 import sys
-import pandas as pd
+import sqlite3
 import configparser
 import logging
+import csv
 import RPi.GPIO as GPIO
+from pathlib import Path
 from hx711 import HX711
 from wrapt_timeout_decorator import timeout
 
+log = logging.getLogger()
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
 class Spool:
-    def __init__(self, spool_id):
-        self.spool_id = spool_id.upper()
-        self.spooldata = pd.read_csv(spool_data)
-        spool_count = len(self.spooldata.index)
-        log.debug(f'Loaded {spool_count} spools')
-        self.loaded_spooldata = self.spooldata.loc[self.spooldata['spool_code'] == self.spool_id.upper()]
-        if len(self.loaded_spooldata.index) == 0:
-            logger.error(f'Spool Code [{loaded_spoolcode}] not found in spool data')
-            exit(2)
-        log.debug(f'Found Spool Data for [{self.spool_id}]')
-        self.refresh_values()
-        self.calculate_values()
+    def __init__(self, spool_db):
+        self.db = Path(spool_db)
+        if not self.db.exists():
+            self.con = sqlite3.connect(spool_db)
+            self.cur = self.con.cursor()
+            log.info(f'Spool database does not exist, creating')
+            self.cur.execute("CREATE TABLE spools ('spool_id', 'material_type', 'color', 'manufacturer', 'density', 'diameter', 'total_volume', 'remaining_volume', 'tolerance', 'flow_rate', 'hotend_temp', 'bed_temp', 'chamber_temp', 'retract_length', 'retract_speed', 'pressure_advance', 'total_weight', 'spool_weight', 'used_weight', 'remaining_weight', 'total_length', 'used_length', 'remaining_length', 'first_use', 'last_use', 'purchased_from', 'purchase_date', 'spool_cost', 'cost_per_gram');")
+        else:
+            log.debug(f'Existing database found {self.db}')
+            self.con = sqlite3.connect(spool_db)
+            self.con.row_factory = dict_factory
+            self.cur = self.con.cursor()
 
-    def reload_data(self):
-        self.spooldata = pd.read_csv(spool_data)
-        self.loaded_spooldata = self.spooldata.loc[self.spooldata['spool_code'] == self.spool_id.upper()]
+    def import_csv(self, csvfile):
+        with open (csvfile, 'r') as f:
+            reader = csv.reader(f)
+            data = next(reader)
+            query = 'insert into spools values ({0})'
+            query = query.format(','.join('?' * len(data)))
+            self.cur.execute(query, data)
+            for data in reader:
+                self.cur.execute(query, data)
+            self.con.commit()
+
+    def close(self):
+        log.debug(f'Closing database {self.spool_db}')
+        self.con.close()
+
+    def list_data(self):
+        dataquery = self.cur.execute("SELECT * FROM spools")
+        data = dataquery.fetchall()
+        return data
+
+    def columns(self):
+        data = self.cur.execute("SELECT * FROM spools")
+        for column in data.description:
+            print(column[0])
+
+    def query_spool(self):
+        self.spooldata = 1
         log.debug(f'Data loaded for [{self.spool_id}]')
         self.refresh_values()
         self.calculate_values()
@@ -115,8 +148,8 @@ def initialize_sensor():
 
 
 if __name__ == '__main__':
+    spool_db = '/home/pi/klipper_config/spools.db'
     vars_file = '/home/pi/klipper_config/saved_vars.cfg'
-    spool_data = '/home/pi/klipper_config/spools.csv'
     sensor_out_pin = 17 # GPIO pin for the weight sensor output
     sensor_clk_pin = 22 # GPIO pin for the weight sensor clock
     loglevel = logging.INFO
@@ -158,10 +191,10 @@ if __name__ == '__main__':
     variables = configparser.ConfigParser()
     variables.read(vars_file)
     if 'Variables' not in variables:
-        logger.error('No section [Variables] in saved_vars.cfg')
+        log.error('No section [Variables] in saved_vars.cfg')
         exit(1)
     elif 'loaded_spool' not in variables['Variables']:
-        logger.error('No variable loaded_spool in section [Variables]')
+        log.error('No variable loaded_spool in section [Variables]')
         exit(1)
 
     loaded_spoolcode = variables['Variables']['loaded_spool'].replace("'", "")
