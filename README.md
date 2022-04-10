@@ -3,16 +3,16 @@
 ### Utilizes a Load Sensor and a HX711 load cell amplifier to calculate filament use and stores the data, these are required.
 ### Optional HTU21D/SHT21/SI7021/HDC1080 Temperature & Humidity Sensor to monitor filament environment.
 
-This is very new alpha work-in-progress side project.<br />
-I havent found any spool management options for klipper, so im making this for myself.<br />
-I came from OctoPrint with the Spool-Manager plugin. It's the only thing I miss after migrating to Klipper, but klipper is way too good for me to go back.
+This is very new *not-running-yet* alpha work-in-progress side project.<br />
+I havent found any satisfactory spool management options for klipper, so im making this for myself.<br />
+I came from OctoPrint with the Spool-Manager plugin. It's the only thing I miss after migrating from OctoPrint, but klipper is way too good for me to go back.
 I'm trying to not make this too custom so others can potentially use it or expand on it.<br />
 Currently, it just uses GCode commands to operate, and uses the printer console to display output. This may change if I figure out better ways to "plug-in" to Klipper. I'm new to klipper, so i'm still trying to figure all this out.
 
 This script requires all spools be labeled with a unique "spool id".  I use a single letter and number for the id, and attach a label to each spool with this id.
 I use P1 for PLA filament #1, G4 for PETG filament #4, etc.  But you can use whatever spool ID's you choose, as long as they are unique for each spool of filament.<br />
 
-This script will display & store information about all of your filament spools, including color, type, manufaturer, first use, last use, date purchased, filament diameter, filament density, filament weights, filament length total, filament length remaining, filament spool price, filament price per gram, and some others.<br />
+This script will display & store information about all of your filament spools, including color, type, manufacturer, first use, last use, date purchased, filament diameter, filament density, filament weights, filament length total, filament length remaining, filament spool price, filament price per gram, and some others.<br />
 It will calculate filament length remaining based on weight after each print and filament change & display and save this infomation.<br />
 
 A calibration script is included to calibrate and recalibrate the weight sensors<br />
