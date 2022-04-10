@@ -63,10 +63,8 @@ A calibration script is included to calibrate and recalibrate the weight sensors
   After A [Variables] section will be added to your saved.vars.cfg file if it doesnt exist, and it will also add any missing variables
      
 ### Sensor Configuration:
-A HX711 sensor board needs to be wired directly to your klipper's raspberry pi.  3.3v Power, Ground, Output, and Clock<br />
-1, 2 or 4 sensors can be wired to 1 HX711 board, depending on the footprint of your spool mount, filament dryer, etc, you may want to use multiple sensors.  The HX711 board will deliver them all as 1 weight reading to the raspberry pi.  See specific sensor wiring options for your HX711 board so the number of sensors you use are wired to the board correctly.<br />
-
-The Output and Clock pins are configured in the saved_vars.cfg file or with WEIGHT_SENSOR_PINS GCode.
+A HX711 load amplifier board needs to be wired directly to your klipper's raspberry pi.  3.3v Power, Ground, Output, and Clock<br />
+The Output and Clock pins are configured in the saved_vars.cfg file or with WEIGHT_SENSOR_PINS GCode.<br />
 
 Uses gcode_shell_command.py extras script.  This we be copied to klipper extras from the install.sh script, assuming your klipper install is a ~/klipper<br />
 
