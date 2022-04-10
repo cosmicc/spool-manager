@@ -1,5 +1,5 @@
 # spool-manager
-## Weighted Filament Spool Manager for Klipper
+## Filament Spool Manager for Klipper
 ### Utilizes a Load Sensor and a HX711 load cell amplifier to calculate filament use and stores the data, these are required.
 ### Optional HTU21D/SHT21/SI7021/HDC1080 Temperature & Humidity Sensor to monitor filament environment.
 
