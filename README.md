@@ -44,12 +44,12 @@ A calibration script is included to calibrate and recalibrate the weight sensors
      [save_variables]
      filename: ~/klipper_config/saved_vars.cfg
   
-     [gcode_shell_command spool]
+     [gcode_shell_command spoolmanager]
      command: ~/spool-manager/spool.py
      timeout: 10
      verbose: True
 
-     [gcode_shell_command calibrate_weight]
+     [gcode_shell_command spoolmanager_calibrate]
      command: ~/spool-manager/calibrate.py
      timeout: 30
      verbose: True
@@ -75,16 +75,16 @@ All results are displayed through the printer console
 Add to your filament load macro:<br />
      `{% set SPOOL_ID = params.SPOOL_ID %}`<br />
      `SAVE_VARIABLE VARIABLE=loaded_spool VALUE='"{SPOOL_ID}"'`<br />
-     `RUN_SHELL_COMMAND CMD=spool PARAMS=load`
+     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=load`
      
 Add to your filament unload macro:<br />
-     `RUN_SHELL_COMMAND CMD=spool PARAMS=unload`
+     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=unload`
      
 Add to your print start macro:<br />
-     `RUN_SHELL_COMMAND CMD=spool PARAMS=printstart` 
+     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=printstart` 
      
 Add to your print end & print cancel macro:<br />
-     `RUN_SHELL_COMMAND CMD=spool PARAMS=printend`
+     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=printend`
  
  GCode commands:<br />
      `SPOOL_INFO  # Displays information about the currently loaded spool of filament`<br />
@@ -100,5 +100,5 @@ Add to your print end & print cancel macro:<br />
   - [ ] Add gcode option to modify calibration_weight option
   - [ ] Add gcode option to modify distance_to_extruder option
   - [ ] Add gcode option to modify extra_weight option
-  - [ ] Possibly move to mysql lite or postgresql database instead of saved csv data
+  - [x] Possibly move to mysql lite or postgresql database instead of saved csv data
   - [ ] Will have to create a csv export option if moved to real database backend
