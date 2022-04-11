@@ -13,6 +13,7 @@ log = logging.getLogger()
 spool = Spool('test.db')
 #spool.import_csv('spool_import.csv')
 #print(spool.columns())
-print(spool.active_spool)
-print(spool.print_active_spool())
+#a = spool.active_spool
+#print(spool.print_spool(a))
+spool.export_csv('test.csv')
 

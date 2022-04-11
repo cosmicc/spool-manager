@@ -33,9 +33,10 @@ class Spool:
         self.db = Path(spool_db)
         if not self.db.exists():
             self.con = sqlite3.connect(spool_db)
+            self.con.row_factory = dict_factory
             self.cur = self.con.cursor()
             log.info(f'Spool database does not exist, creating')
-            self.cur.execute("CREATE TABLE spools ('spool_id', 'material_type', 'color', 'manufacturer', 'density', 'diameter', 'total_volume', 'remaining_volume', 'tolerance', 'flow_rate', 'hotend_temp', 'bed_temp', 'chamber_temp', 'retract_length', 'retract_speed', 'pressure_advance', 'total_weight', 'spool_weight', 'used_weight', 'remaining_weight', 'total_length', 'used_length', 'remaining_length', 'first_use', 'last_use', 'purchased_from', 'purchase_date', 'spool_cost', 'cost_per_gram');")
+            self.cur.execute("CREATE TABLE spools ('spool_id', 'material_type', 'color', 'manufacturer', 'density', 'diameter', 'tolerance', 'flow_rate', 'hotend_temp', 'bed_temp', 'chamber_temp', 'retract_length', 'retract_speed', 'pressure_advance', 'total_weight', 'spool_weight', 'remaining_weight', 'first_use', 'last_use', 'purchased_from', 'purchase_date', 'spool_cost', 'cost_per_gram');")
         else:
             log.debug(f'Existing database found {self.db}')
             self.con = sqlite3.connect(spool_db)
@@ -57,10 +58,9 @@ class Spool:
             self.calibration_offset = variables['Variables']['calibration_offset']
             log.debug('Variables loaded from saved_vars.cfg')
             log.debug(f'Current Spool ID retrieved from saved_vars.cfg: {spool_id}')
-            self.active_spool = self.query_spool(spool_id)
+            self.active_spool = self.get_spool(spool_id)
             if self.active_spool == 'None':
                 log.error(f'Active spool ID [{spool_id}] does not exist in database')
-                exit(2)
 
     def import_csv(self, csvfile):
         with open (csvfile, 'r') as f:
@@ -72,6 +72,21 @@ class Spool:
             for data in reader:
                 self.cur.execute(query, data)
             self.con.commit()
+        rows = len(self.get_all_data())
+        log.info(f'Successfully imported {rows} spools from {csvfile} into database')
+
+    def export_csv(self, csvfile):
+        with open(csvfile, 'w', newline='') as f:
+            writer = csv.writer(f)
+            excon = sqlite3.connect(self.db)
+            excur = excon.cursor()
+            dataquery = excur.execute('SELECT * from spools')
+            data = dataquery.fetchall()
+            excon.close()
+            writer.writerow(self.columns())
+            writer.writerows(data)
+        rows = len(self.get_all_data())
+        log.info(f'Successfully exported {rows} spools to {csvfile}')
 
     def close(self):
         log.debug(f'Closing database {self.spool_db}')
@@ -84,63 +99,74 @@ class Spool:
 
     def columns(self):
         data = self.cur.execute("SELECT * FROM spools")
+        columns = []
         for column in data.description:
-            print(column[0])
+            columns.append(column[0])
+        return columns
 
-    def query_spool(self, spool_id):
+    def get_spool(self, spool_id):
         spoolquery = self.cur.execute(f"SELECT * FROM spools WHERE spool_id = '{spool_id}'")
         spooldata = self.cur.fetchall()
-        if spooldata != '':
+        if len(spooldata) > 0:
             log.debug(f'Found spool [{spool_id}]')
-            return spooldata
+            return spooldata[0]
         else:
             log.debug(f'No spool found [{spool_id}]')
             return 'None'
 
-    def refresh_values(self):
-        log.debug(f'Refreshing values for [{self.spool_id}]')
-        self.current_weight_g = calculate_live_weight()
-        self.loaded_spoolweight_g = self.loaded_spooldata['remaining _weight'].values[0] - self.loaded_spooldata['spool_weight'].values[0]
-        self.loaded_spoolname = f"{self.loaded_spooldata['color'].values[0]} {self.loaded_spooldata['material'].values[0]} [{self.spool_id}]"
-        self.loaded_spoollength_m = float(self.loaded_spooldata['ramaining_length'].values[0])
-        self.loaded_density = self.loaded_spooldata['density'].values[0]
-        self.loaded_total_weight = self.loaded_spooldata['total_weight'].values[0]
-        self.loaded_total_volume = self.loaded_total_weight / self.loaded_density
-        self.diameter_mm = float(self.loaded_spooldata['diameter'].values[0])
+    #def refresh_values(self):
+    #    log.debug(f'Refreshing values for [{self.spool_id}]')
+    #    self.current_weight_g = calculate_live_weight()
+    #    self.loaded_spoolweight_g = self.loaded_spooldata['remaining _weight'].values[0] - self.loaded_spooldata['spool_weight'].values[0]
+    #    self.loaded_spoolname = f"{self.loaded_spooldata['color'].values[0]} {self.loaded_spooldata['material'].values[0]} [{self.spool_id}]"
+    #    self.loaded_spoollength_m = float(self.loaded_spooldata['ramaining_length'].values[0])
+    #    self.loaded_density = self.loaded_spooldata['density'].values[0]
+    #    self.loaded_total_weight = self.loaded_spooldata['total_weight'].values[0]
+    #    self.loaded_total_volume = self.loaded_total_weight / self.loaded_density
+    #    self.diameter_mm = float(self.loaded_spooldata['diameter'].values[0])
 
-    def calculate_values(self):
-        log.debug(f'Calculating values for [{self.spool_id}]')
-        self.cross_area_mm = (self.diameter_mm/2) ** 2 * 3.1415926535
-        self.loaded_total_length_m = self.loaded_total_volume / self.cross_area_mm
-        self.weight_difference_g = self.loaded_spoolweight_g - self.current_weight_g
-        self.current_volume = self.current_weight_g / self.loaded_density
-        self.current_length_m = self.current_volume / self.cross_area_mm
-        self.length_used_m = (self.loaded_total_length_m - self.current_length_m)
-        self.length_difference_mm = (self.loaded_spoollength_m - self.current_length_m) * 1000
+    def cross_area(self, spooldata):
+        return (float(spooldata['diameter']))/2 ** 2 * 3.1415926535
+
+    def total_volume(self, spooldata):
+        return float(spooldata['total_weight']) / float(spooldata['density'])
+
+    def remaining_volume(self, spooldata):
+        return (float(spooldata['remaining_weight']) - float(spooldata['spool_weight'])) / float(spooldata['density'])
+
+    def total_length(self, spooldata):
+        return self.total_volume(spooldata) / self.cross_area(spooldata)
+
+    def remaining_length(self, spooldata):
+        return self.remaining_volume(spooldata) / self.cross_area(spooldata)
+
+    def used_length(self, spooldata):
+        return self.total_length(spooldata) - self.remaining_length(spooldata)
 
     def get_current_weight(self):
         pass
 
-    def print_active_spool(self):
-        log.info(f'Loaded Spool: {self.active_spool[0]["spool_id"]}')
+    def print_spool(self, spooldata):
+        log.info(f'Loaded Spool: {spooldata["spool_id"]}')
         if verbose:
-            log.info(f'Filament Diameter: {float(self.active_spool[0]["diameter"]):.2f} mm')
-            log.info(f'Filament Density: {self.active_spool[0]["density"]} g/cm^3')
-            #log.info(f'Filament Cross-Section Area: {self.cross_area_mm:.8f} mm')
+            log.info(f'Filament Diameter: {float(spooldata["diameter"]):.2f} mm')
+            log.info(f'Filament Density: {spooldata["density"]} g/cm^3')
+            log.debug(f'Filament Cross-Section Area: {self.cross_area(spooldata):.8f} mm')
 
-            log.info(f'Full Filament Weight: {float(self.active_spool[0]["total_weight"]):.3f} m')
-            log.info(f'Full Filament Volume: {float(self.active_spool[0]["total_volume"]):.3f} cm^3')
-            log.info(f'Full Filament Length: {float(self.active_spool[0]["total_length"]):.3f} m')
+            log.info(f'Spool Only Weight: {float(spooldata["spool_weight"]):.3f} g')
+            log.info(f'Full Filament Weight: {float(spooldata["total_weight"]):.3f} g')
+            log.debug(f'Full Filament Volume: {self.total_volume(spooldata):.3f} cm^3')
+            log.info(f'Full Filament Length: {self.total_length(spooldata):.3f} m')
 
-        log.info(f'Stored Remaining Weight: {self.loaded_spoolweight_g:.2f} g')
-        log.info(f'Current Filament Weight: {self.current_weight_g:.3f} m')
-        log.info(f'Current Weight Difference: {self.weight_difference_g:.3f} g')
+            log.debug(f'Remaining Filament Volume: {self.remaining_volume(spooldata):.3f} cm^3')
 
-        log.debug(f'Current Filament Volume: {self.current_volume:.3f} cm^3')
-        log.info(f'Current Filament Length: {self.current_length_m:.3f} g')
-        log.info(f'Current Length Difference: {self.length_difference_mm:.3f} mm')
+        log.info(f'Filament Purchased on {spooldata["purchase_date"]} from {spooldata["purchased_from"]}')
+        log.info(f'Filament first used on {spooldata["first_use"]}')
+        log.info(f'Filament Last used on {spooldata["last_use"]}')
+        log.info(f'Filament Length Used: {self.used_length(spooldata):.3f} m')
+        log.info(f'Remaining Weight: {float(spooldata["remaining_weight"]) - float(spooldata["spool_weight"]):.2f} g')
+        log.info(f'Remaining Length: {self.remaining_length(spooldata):.3f} m')
 
-        log.info(f'Total Length Used: {self.length_used_m:.3f} m')
 
 @timeout(3)
 def calculate_live_weight():

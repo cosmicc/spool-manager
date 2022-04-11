@@ -101,4 +101,4 @@ Add to your print end & print cancel macro:<br />
   - [ ] Add gcode option to modify distance_to_extruder option
   - [ ] Add gcode option to modify extra_weight option
   - [x] Possibly move to mysql lite or postgresql database instead of saved csv data
-  - [ ] Will have to create a csv export option if moved to real database backend
+  - [x] Will have to create a csv export option if moved to real database backend
