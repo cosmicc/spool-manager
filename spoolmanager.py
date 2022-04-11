@@ -20,6 +20,7 @@ from hx711 import HX711
 from wrapt_timeout_decorator import timeout
 
 log = logging.getLogger()
+verbose = True
 
 def dict_factory(cursor, row):
     d = {}
@@ -28,7 +29,7 @@ def dict_factory(cursor, row):
     return d
 
 class Spool:
-    def __init__(self, spool_db):
+    def __init__(self, spool_db, vars_file='/home/pi/klipper_config/saved_vars.cfg'):
         self.db = Path(spool_db)
         if not self.db.exists():
             self.con = sqlite3.connect(spool_db)
@@ -40,6 +41,26 @@ class Spool:
             self.con = sqlite3.connect(spool_db)
             self.con.row_factory = dict_factory
             self.cur = self.con.cursor()
+
+        variables = configparser.ConfigParser()
+        variables.read(vars_file)
+        if 'Variables' not in variables:
+            log.error('No section [Variables] in saved_vars.cfg, saving defaults')
+            variables['Variables']['active_spool'] = "'None'"
+            variables['Variables']['extra_weight'] = 0
+            variables['Variables']['distance_to_extruder'] = 0
+            variables['Variables']['calibration_offset'] = 0
+        else:
+            spool_id = variables['Variables']['active_spool'].replace("'", "")
+            self.extra_weight = variables['Variables']['extra_weight']
+            self.distance_to_extruder = variables['Variables']['distance_to_extruder']
+            self.calibration_offset = variables['Variables']['calibration_offset']
+            log.debug('Variables loaded from saved_vars.cfg')
+            log.debug(f'Current Spool ID retrieved from saved_vars.cfg: {spool_id}')
+            self.active_spool = self.query_spool(spool_id)
+            if self.active_spool == 'None':
+                log.error(f'Active spool ID [{spool_id}] does not exist in database')
+                exit(2)
 
     def import_csv(self, csvfile):
         with open (csvfile, 'r') as f:
@@ -56,7 +77,7 @@ class Spool:
         log.debug(f'Closing database {self.spool_db}')
         self.con.close()
 
-    def list_data(self):
+    def get_all_data(self):
         dataquery = self.cur.execute("SELECT * FROM spools")
         data = dataquery.fetchall()
         return data
@@ -66,11 +87,15 @@ class Spool:
         for column in data.description:
             print(column[0])
 
-    def query_spool(self):
-        self.spooldata = 1
-        log.debug(f'Data loaded for [{self.spool_id}]')
-        self.refresh_values()
-        self.calculate_values()
+    def query_spool(self, spool_id):
+        spoolquery = self.cur.execute(f"SELECT * FROM spools WHERE spool_id = '{spool_id}'")
+        spooldata = self.cur.fetchall()
+        if spooldata != '':
+            log.debug(f'Found spool [{spool_id}]')
+            return spooldata
+        else:
+            log.debug(f'No spool found [{spool_id}]')
+            return 'None'
 
     def refresh_values(self):
         log.debug(f'Refreshing values for [{self.spool_id}]')
@@ -96,16 +121,16 @@ class Spool:
     def get_current_weight(self):
         pass
 
-    def print_values(self):
-        log.info(f'Loaded Spool: {self.loaded_spoolname}')
+    def print_active_spool(self):
+        log.info(f'Loaded Spool: {self.active_spool[0]["spool_id"]}')
         if verbose:
-            log.info(f'Filament Diameter: {self.diameter_mm:.2f} mm')
-            log.info(f'Filament Density: {self.loaded_density} g/cm^3')
-            log.info(f'Filament Cross-Section Area: {self.cross_area_mm:.8f} mm')
+            log.info(f'Filament Diameter: {float(self.active_spool[0]["diameter"]):.2f} mm')
+            log.info(f'Filament Density: {self.active_spool[0]["density"]} g/cm^3')
+            #log.info(f'Filament Cross-Section Area: {self.cross_area_mm:.8f} mm')
 
-            log.info(f'Full Filament Weight: {self.loaded_total_weight:.3f} m')
-            log.info(f'Full Filament Volume: {self.loaded_total_volume:.3f} cm^3')
-            log.info(f'Full Filament Length: {self.loaded_total_length_m:.3f} m')
+            log.info(f'Full Filament Weight: {float(self.active_spool[0]["total_weight"]):.3f} m')
+            log.info(f'Full Filament Volume: {float(self.active_spool[0]["total_volume"]):.3f} cm^3')
+            log.info(f'Full Filament Length: {float(self.active_spool[0]["total_length"]):.3f} m')
 
         log.info(f'Stored Remaining Weight: {self.loaded_spoolweight_g:.2f} g')
         log.info(f'Current Filament Weight: {self.current_weight_g:.3f} m')
