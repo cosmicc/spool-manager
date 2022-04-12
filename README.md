@@ -44,23 +44,9 @@ A calibration script is included to calibrate and recalibrate the weight sensors
      [save_variables]
      filename: ~/klipper_config/saved_vars.cfg
   
-     [gcode_shell_command spoolmanager]
-     command: ~/spool-manager/spool.py
-     timeout: 10
-     verbose: True
-
-     [gcode_shell_command spoolmanager_calibrate]
-     command: ~/spool-manager/calibrate.py
-     timeout: 30
-     verbose: True
-
-  **Add to klipper's printer.cfg (or wherever you put your klipper gcode macros)**<br />
-     `to be added`
-
-  **Other klipper gcode examples:**<br />
-     `to be added`
+     [include spoolmanager.cfg]
      
-  After A [Variables] section will be added to your saved.vars.cfg file if it doesnt exist, and it will also add any missing variables
+  A [Variables] section will be added to your saved.vars.cfg file if it doesnt exist, and it will also add any missing variables
      
 ### Sensor Configuration:
 A HX711 load amplifier board needs to be wired directly to your klipper's raspberry pi.  3.3v Power, Ground, Output, and Clock<br />
@@ -69,24 +55,8 @@ The Output and Clock pins are configured in the saved_vars.cfg file or with WEIG
 Uses gcode_shell_command.py extras script.  This we be copied to klipper extras from the install.sh script, assuming your klipper install is a ~/klipper<br />
 
 ### Usage:
-All results are displayed through the printer console
+All results are displayed through the printer console<br />
 
-*GCode Commands add to your existing macros:*<br />
-Add to your filament load macro:<br />
-     `{% set SPOOL_ID = params.SPOOL_ID %}`<br />
-     `SAVE_VARIABLE VARIABLE=loaded_spool VALUE='"{SPOOL_ID}"'`<br />
-     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=load`
-     
-Add to your filament unload macro:<br />
-     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=unload`
-     
-Add to your print start macro:<br />
-     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=printstart` 
-     
-Add to your print end & print cancel macro:<br />
-     `RUN_SHELL_COMMAND CMD=spoolmanager PARAMS=printend`
- 
- GCode commands:<br />
      `SPOOL_INFO  # Displays information about the currently loaded spool of filament`<br />
      `CALIBRATE_SENSOR  # Runs the sensors calibration script`
      
