@@ -2,6 +2,9 @@ echo -e "Spool-Manager for Klipper Installer script\n"
 echo -n "Installing gcode shell command script to Klipper extras..."
 cp extras/gcode_shell_command.py ~/klipper/klippy/extras
 echo " Complete"
+echo -n "Installing spool-manager klipper include file..."
+cp spoolmanager.cfg ~/klipper/klippy/extras
+echo " Complete"
 echo -n "Installing Python requirements..."
 pip3 -q install -r requirements.txt
 echo " Complete"

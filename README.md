@@ -58,7 +58,7 @@ Uses gcode_shell_command.py extras script.  This we be copied to klipper extras 
 All results are displayed through the printer console<br />
 
      `SPOOL_INFO  # Displays information about the currently loaded spool of filament`<br />
-     `CALIBRATE_SENSOR  # Runs the sensors calibration script`
+     `CALIBRATE_SCALE  # Runs the sensors calibration script`
      
 ### Todo & Potential Features:
   - [ ] Move weight sensor pins to saved_vars.cfg

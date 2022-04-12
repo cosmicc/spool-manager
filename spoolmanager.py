@@ -51,11 +51,34 @@ class Spool:
             variables['Variables']['extra_weight'] = 0
             variables['Variables']['distance_to_extruder'] = 0
             variables['Variables']['calibration_offset'] = 0
+            variables['Variables']['sensor_pin_out'] = 5
+            variables['Variables']['sensor_pin_clk'] = 6
+            variables.write(vars_file)
         else:
+            if 'active_spool' not in variables['Variables']:
+                variables['Variables']['active_spool'] = "'None'"
+                variables.write(vars_file)
+            if 'extra_weight' not in variables['Variables']:
+                 variables['Variables']['extra_weight'] = 0
+                 variables.write(vars_file)
+            if 'distance_to_extruder' not in variables['Variables']:
+                variables['Variables']['distance_to_extruder'] = 0
+                variables.write(vars_file)
+            if 'calibration_offset' not in variables['Variables']:
+                 variables['Variables']['calibration_offset'] = 0
+                 variables.write(vars_file)
+            if 'sensor_pin_put' not in variables['Variables']:
+                variables['Variables']['sensor_pin_out'] = 5
+                variables.write(vars_file)
+            if 'sensor_pin_clk' not in variables['Variables']:
+                 variables['Variables']['sensor_pin_clk'] = 6
+                 variables.write(vars_file)
             spool_id = variables['Variables']['active_spool'].replace("'", "")
             self.extra_weight = variables['Variables']['extra_weight']
             self.distance_to_extruder = variables['Variables']['distance_to_extruder']
             self.calibration_offset = variables['Variables']['calibration_offset']
+            self.sensor_pin_out = variables['Variables']['sensor_pin_out']
+            self.sensor_pin_clk = variables['Variables']['sensor_pin_clk']
             log.debug('Variables loaded from saved_vars.cfg')
             log.debug(f'Current Spool ID retrieved from saved_vars.cfg: {spool_id}')
             self.active_spool = self.get_spool(spool_id)
