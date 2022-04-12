@@ -37,22 +37,22 @@ A calibration script is included to calibrate and recalibrate the weight sensors
 ```
   
 ### Klipper Configuration:
-  *Uses klippers save_variables config option*
+  *Uses klippers save_variables config option.  You only need to add the [save_variables] to your printer.cfg if it doesn't already exist*
 
   **Add to klipper's printer.cfg:**
   
-     [save_variables]
-     filename: ~/klipper_config/saved_vars.cfg
-  
      [include spoolmanager.cfg]
      
-  A [Variables] section will be added to your saved.vars.cfg file if it doesnt exist, and it will also add any missing variables
+     [save_variables]
+     filename: ~/klipper_config/saved_vars.cfg
+     
+  A [Variables] section will be added to your saved_vars.cfg file if it doesnt exist, and it will also add any missing variables
      
 ### Sensor Configuration:
 A HX711 load amplifier board needs to be wired directly to your klipper's raspberry pi.  3.3v Power, Ground, Output, and Clock<br />
 The Output and Clock pins are configured in the saved_vars.cfg file or with WEIGHT_SENSOR_PINS GCode.<br />
 
-Uses gcode_shell_command.py extras script.  This we be copied to klipper extras from the install.sh script, assuming your klipper install is a ~/klipper<br />
+Uses gcode_shell_command.py extras script.  This will be copied to klipper extras from the install.sh script, assuming your klipper install directory is ~/klipper<br />
 
 ### Usage:
 All results are displayed through the printer console<br />
@@ -61,9 +61,9 @@ All results are displayed through the printer console<br />
      `CALIBRATE_SCALE  # Runs the sensors calibration script`
      
 ### Todo & Potential Features:
-  - [ ] Move weight sensor pins to saved_vars.cfg
+  - [x] Move weight sensor pins to saved_vars.cfg
   - [ ] Add a way to add new spools/edit spool data manually (and/or with Gcodes possibly)
-  - [ ] Query other spools infomation that arnt currently loaded
+  - [ ] Query other spool infomation that are not currently loaded
   - [ ] Display filament results after end of each print
   - [ ] Add gcode execute before calibration to shut off any lights, fans, motors, heat
   - [ ] Add gcode option to modify weight sensor pins
