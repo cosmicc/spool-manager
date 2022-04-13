@@ -28,6 +28,7 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
+
 class Spool:
     def __init__(self, spool_db, vars_file='/home/pi/klipper_config/saved_vars.cfg'):
         self.db = Path(spool_db)

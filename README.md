@@ -1,6 +1,6 @@
 # spool-manager
 ## Filament Spool Manager for Klipper
-### Utilizes a Load Sensor and a HX711 load cell amplifier to calculate filament use, these are required.
+### Utilizes a Load Sensor, a HX711 load cell amplifier board, and a ESP32 microcontroller to calculate filament use, these are required.
 ### Optional HTU21D/SHT21/SI7021/HDC1080 Temperature & Humidity Sensor to monitor filament environment.
 
 This is very new *not-running-yet* alpha work-in-progress side project.<br />
@@ -15,13 +15,12 @@ I use P1 for PLA filament #1, G4 for PETG filament #4, etc.  But you can use wha
 This script will display & store information about all of your filament spools, including color, type, manufacturer, first use, last use, date purchased, filament diameter, filament density, filament weights, filament length total, filament length remaining, filament spool price, filament price per gram, and some others.<br />
 It will calculate filament length remaining based on weight after each print and filament change & display and save this infomation.<br />
 
-A calibration script is included to calibrate and recalibrate the weight sensors<br />
-
 ### General Requirements:
-     Analog Load Cell (2kg or 5kg Preferred for best accuracy) https://tinyurl.com/2p9857vx
-     HX711 Load cell amplifier (Comes with most load cells)
-     (Optional) HTU21D/SHT21/SI7021/HDC1080 Temp Sensor 
-     Raspberry Pi running klipper
+     Analog Load Cell (2kg or 5kg Preferred for best accuracy)
+     HX711 Load cell amplifier.  Sparkfun makes a HX711 that has dual input voltages for non 5v gpio tolerant arduinos.
+     A ESP32 microcontroller.  I may add a USB communication option so any arduino can be used, but for now its specifically for a ESP32, and communicates over the network.
+     (Optional) HTU21D/SHT21/SI7021/HDC1080 Temp Sensor.  If using a filament dryer to feed printer, or just to monitor the open air your spool is in.
+     Raspberry Pi setup and running klipper
      Python 3.8+
 
 ### Install:
@@ -33,7 +32,6 @@ A calibration script is included to calibrate and recalibrate the weight sensors
 *Python Requirements:*<br />
 ```
     moonraker-api (installed from install.sh)
-    hx711 (installed from install.sh)
 ```
   
 ### Klipper Configuration:
@@ -46,13 +44,30 @@ A calibration script is included to calibrate and recalibrate the weight sensors
      [save_variables]
      filename: ~/klipper_config/saved_vars.cfg
      
-  A [Variables] section will be added to your saved_vars.cfg file if it doesnt exist, and it will also add any missing variables
-     
-### Sensor Configuration:
-A HX711 load amplifier board needs to be wired directly to your klipper's raspberry pi.  3.3v Power, Ground, Output, and Clock<br />
-The Output and Clock pins are configured in the saved_vars.cfg file or with WEIGHT_SENSOR_PINS GCode.<br />
+  A [Variables] section will be added to your saved_vars.cfg file if it doesnt exist, and it will also add any missing variables that spool-manager requires.<br />
 
-Uses gcode_shell_command.py extras script.  This will be copied to klipper extras from the install.sh script, assuming your klipper install directory is ~/klipper<br />
+  ** Add to your existing klipper macros:**
+
+Add to your existing "Filament Load" macro:
+  SM-LOAD
+
+Add to your existing "Filament Unload" macro:
+  SM-UNLOAD
+
+Add to your existing "Start Print" macro:
+  SM-PRINTSTART
+
+Add to your existing "End Print" and "Print Cancel" macros:
+  SM-PRINTEND
+
+
+### Sensor Configuration:
+The HX711 load amplifier board and optional temp/humidity sensor needs to be wired to the ESP32<br />
+The ESP32 will communicate to the Raspberry Pi running Klipper via Wifi, so it will be a completely independant system with no physical connections to the printer or RPi itself.<br />
+The ESP32 sketch spoolmanager.ino is included and needs to be flashed to the ESP32.
+The pins used to connect the sensors to the ESP32 and wifi credentials can be set at the top of the sketch before flashing.<br />More information can be found at the top of the spoolmanager.ino file.<br />
+
+Uses the gcode_shell_command.py extras script.  This will be copied to klipper extras by the install.sh script, assuming your klipper install directory is ~/klipper<br />
 
 ### Usage:
 All results are displayed through the printer console<br />
@@ -61,7 +76,6 @@ All results are displayed through the printer console<br />
      `CALIBRATE_SCALE  # Runs the sensors calibration script`
      
 ### Todo & Potential Features:
-  - [x] Move weight sensor pins to saved_vars.cfg
   - [ ] Add a way to add new spools/edit spool data manually (and/or with Gcodes possibly)
   - [ ] Query other spool infomation that are not currently loaded
   - [ ] Display filament results after end of each print
@@ -70,5 +84,6 @@ All results are displayed through the printer console<br />
   - [ ] Add gcode option to modify calibration_weight option
   - [ ] Add gcode option to modify distance_to_extruder option
   - [ ] Add gcode option to modify extra_weight option
-  - [x] Possibly move to mysql lite or postgresql database instead of saved csv data
+  - [ ] Add USB serial communication option so non wifi arduinos can used to communicate to the RPi (instead of over network)
+  - [x] Move to mysql lite or postgresql database instead of saved csv data
   - [x] Will have to create a csv export option if moved to real database backend
