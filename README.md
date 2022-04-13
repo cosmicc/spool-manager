@@ -1,6 +1,6 @@
 # spool-manager
 ## Filament Spool Manager for Klipper
-### Utilizes a Load Sensor, a HX711 load cell amplifier board, and a ESP32 microcontroller to calculate filament use, these are required.
+### Utilizes a Load Sensor, a HX711 load cell amplifier board, and arduino microcontroller to calculate filament use, these are required.
 ### Optional HTU21D/SHT21/SI7021/HDC1080 Temperature & Humidity Sensor to monitor filament environment.
 
 This is very new *not-running-yet* alpha work-in-progress side project.<br />
@@ -16,12 +16,12 @@ This script will display & store information about all of your filament spools, 
 It will calculate filament length remaining based on weight after each print and filament change & display and save this infomation.<br />
 
 ### General Requirements:
-     Analog Load Cell (2kg or 5kg Preferred for best accuracy)
-     HX711 Load cell amplifier.  Sparkfun makes a HX711 that has dual input voltages for non 5v gpio tolerant arduinos.
-     A ESP32 microcontroller.  I may add a USB communication option so any arduino can be used, but for now its specifically for a ESP32, and communicates over the network.
-     (Optional) HTU21D/SHT21/SI7021/HDC1080 Temp Sensor.  If using a filament dryer to feed printer, or just to monitor the open air your spool is in.
-     Raspberry Pi setup and running klipper
-     Python 3.8+
+     - Analog Load Cell (2kg or 5kg Preferred for best accuracy)
+     - HX711 Load cell amplifier.  Sparkfun makes a HX711 that has dual input voltages for non 5v gpio tolerant arduinos.
+     - An arduino. If your ardunio is only 3.3v gpio tolerant, consider the dual voltage sparkfun hx711
+     - (Optional) HTU21D/SHT21/SI7021/HDC1080 Temp Sensor.  If using a filament dryer to feed printer, or just to monitor the open air your spool is in.
+     - Raspberry Pi setup and running klipper
+     - Python 3.8+
 
 ### Install:
      cd ~
@@ -49,23 +49,23 @@ It will calculate filament length remaining based on weight after each print and
   ** Add to your existing klipper macros:**
 
 Add to your existing "Filament Load" macro:
-  SM-LOAD
+  `SM-LOAD`
 
 Add to your existing "Filament Unload" macro:
-  SM-UNLOAD
+  `SM-UNLOAD`
 
 Add to your existing "Start Print" macro:
-  SM-PRINTSTART
+  `SM-PRINTSTART`
 
-Add to your existing "End Print" and "Print Cancel" macros:
-  SM-PRINTEND
+Add to your existing "End Print" and "Cancel Print" macros:
+  `SM-PRINTEND`
 
 
 ### Sensor Configuration:
 The HX711 load amplifier board and optional temp/humidity sensor needs to be wired to the ESP32<br />
-The ESP32 will communicate to the Raspberry Pi running Klipper via Wifi, so it will be a completely independant system with no physical connections to the printer or RPi itself.<br />
-The ESP32 sketch spoolmanager.ino is included and needs to be flashed to the ESP32.
-The pins used to connect the sensors to the ESP32 and wifi credentials can be set at the top of the sketch before flashing.<br />More information can be found at the top of the spoolmanager.ino file.<br />
+The arduino will communicate to the Raspberry Pi running Klipper over USB<br />
+The arduino sketch spoolmanager.ino is included and needs to be flashed to the arduino.
+The pins used to connect the sensors to the arduino can be set at the top of the sketch before flashing.<br />More information can be found at the top of the spoolmanager.ino file.<br />
 
 Uses the gcode_shell_command.py extras script.  This will be copied to klipper extras by the install.sh script, assuming your klipper install directory is ~/klipper<br />
 

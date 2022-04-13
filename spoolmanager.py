@@ -192,41 +192,9 @@ class Spool:
         log.info(f'Remaining Length: {self.remaining_length(spooldata):.3f} m')
 
 
-@timeout(3)
-def calculate_live_weight():
-    #log.debug('Reading values from load sensor')
-    #try:
-    #    measures = hx711.get_raw_data(num_measures=10)
-    #except:
-    #    log.error('Error reading load values')
-    #    GPIO.cleanup()
-    #    exit(3)
-    #return measures
-    return 998
-
-@timeout(3)
-def initialize_sensor():
-    log.debug('Initalizing load sensor')
-    try:
-        hx711 = HX711(
-            dout_pin=sensor_out_pin,
-            pd_sck_pin=sensor_clk_pin,
-            channel='A',
-            gain=64
-        )
-
-        hx711.reset()   # Before we start, reset the HX711 (not obligate)
-    except:
-        log.error('Error initializing the load sensor')
-        GPIO.cleanup()
-        exit(3)
-
-
 if __name__ == '__main__':
     spool_db = '/home/pi/klipper_config/spools.db'
     vars_file = '/home/pi/klipper_config/saved_vars.cfg'
-    sensor_out_pin = 17 # GPIO pin for the weight sensor output
-    sensor_clk_pin = 22 # GPIO pin for the weight sensor clock
     loglevel = logging.INFO
 
     console_handler = logging.StreamHandler(sys.stdout)
@@ -281,7 +249,7 @@ if __name__ == '__main__':
     spool = Spool(loaded_spoolcode)
 
     if mode == 'query':
-        spool.print_values()
+        spool.print_spool()
         exit(0)
     elif mode == 'load' or mode == 'endprint':
         pass
